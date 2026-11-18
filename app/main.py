@@ -15,7 +15,7 @@ MODELS = [
     m.strip()
     for m in os.getenv(
         "OPENROUTER_MODEL",
-        "meta-llama/llama-3.3-70b-instruct:free,google/gemma-3-27b-it:free,mistralai/mistral-small-3.2-24b-instruct:free",
+        "google/gemma-4-31b-it:free,google/gemma-4-26b-a4b-it:free,nvidia/nemotron-3.5-lightning:free,inclusionai/ling-3.2-flash:free",
     ).split(",")
     if m.strip()
 ]
