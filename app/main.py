@@ -27,6 +27,9 @@ SYSTEM = (
     "belongs to. Prices for Wasalt listings are in SAR. Keep answers short and factual."
 )
 
+# words that carry no signal: English function words plus the two company names that appear everywhere
+STOP = set("a an the of in on at to for from by with and or is are was were be been what whats which who whom how much many does do did tell me about give show s dar global darglobal wasalt please can could i you it its their there this that".split())
+
 TOKEN = re.compile(r"[a-z0-9]+")
 
 
@@ -74,6 +77,32 @@ def load_chunks():
     return chunks
 
 
+SYNONYMS = {
+    "ceo": ["chief", "executive", "officer", "founder"],
+    "founder": ["chief", "executive", "officer"],
+    "sold": ["sales", "contracted"],
+    "sales": ["contracted"],
+    "revenue": ["results", "profit"],
+    "profit": ["results", "revenue"],
+    "headquarters": ["headquartered", "london"],
+    "hq": ["headquartered", "london"],
+    "cheap": ["cheapest", "lowest", "starting"],
+    "price": ["prices", "starting", "sar", "qar"],
+    "cost": ["price", "starting", "sar", "qar"],
+    "visa": ["residency", "golden"],
+    "countries": ["markets", "presence"],
+    "partners": ["brands", "partnered"],
+    "employees": ["offices"],
+}
+
+
+def expand(q):
+    out = list(q)
+    for t in q:
+        out.extend(SYNONYMS.get(t, []))
+    return out
+
+
 class BM25:
     def __init__(self, docs, k1=1.5, b=0.75):
         self.docs = [Counter(tokens(d)) for d in docs]
@@ -85,9 +114,10 @@ class BM25:
             df.update(c.keys())
         n = len(self.docs)
         self.idf = {t: math.log(1 + (n - f + 0.5) / (f + 0.5)) for t, f in df.items()}
+        self.common = STOP
 
     def top(self, query, k=4):
-        q = tokens(query)
+        q = expand([t for t in tokens(query) if t not in self.common] or tokens(query))
         scores = []
         for i, c in enumerate(self.docs):
             s = 0.0
