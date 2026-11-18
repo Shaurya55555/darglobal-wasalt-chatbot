@@ -34,6 +34,24 @@ def tokens(text: str):
     return TOKEN.findall(text.lower())
 
 
+MAX_CHARS = 1100
+
+
+def split_text(text: str):
+    """Split a long section into pieces of at most MAX_CHARS on sentence boundaries."""
+    if len(text) <= MAX_CHARS:
+        return [text]
+    parts, cur = [], ""
+    for sent in re.split(r"(?<=[.;])\s+", text):
+        if cur and len(cur) + len(sent) > MAX_CHARS:
+            parts.append(cur)
+            cur = ""
+        cur = (cur + " " + sent).strip()
+    if cur:
+        parts.append(cur)
+    return parts
+
+
 def load_chunks():
     chunks = []
     for path in sorted(DATA_DIR.glob("*.md")):
@@ -42,8 +60,9 @@ def load_chunks():
 
         def flush():
             body = " ".join(buf).strip()
-            if body:
-                chunks.append({"source": source, "title": title, "text": f"{title}. {body}"})
+            for n, piece in enumerate(split_text(body), 1):
+                label = title if n == 1 else f"{title} (part {n})"
+                chunks.append({"source": source, "title": label, "text": f"{title}. {piece}"})
 
         for line in path.read_text(encoding="utf-8").splitlines():
             if line.startswith("## "):
@@ -120,7 +139,7 @@ async def call_llm(messages):
 
 @app.post("/api/chat")
 async def chat(req: Ask):
-    ids = INDEX.top(req.message, k=4)
+    ids = INDEX.top(req.message, k=5)
     passages = [CHUNKS[i] for i in ids]
     context = "\n\n".join(f"[{p['source']} / {p['title']}]\n{p['text']}" for p in passages)
     messages = [{"role": "system", "content": SYSTEM}]
