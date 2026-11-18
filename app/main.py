@@ -93,6 +93,16 @@ SYNONYMS = {
     "countries": ["markets", "presence"],
     "partners": ["brands", "partnered"],
     "employees": ["offices"],
+    "h1": ["hy", "interim", "results", "revenue", "profit"],
+    "h2": ["hy", "interim", "results"],
+    "perform": ["results", "revenue", "profit", "growth"],
+    "performance": ["results", "revenue", "profit", "growth"],
+    "performed": ["results", "revenue", "profit", "growth"],
+    "financial": ["results", "revenue", "profit", "ebitda"],
+    "financials": ["results", "revenue", "profit", "ebitda"],
+    "earnings": ["results", "revenue", "profit"],
+    "stock": ["london", "listed"],
+    "listed": ["london", "stock", "exchange"],
 }
 
 
